@@ -148,36 +148,62 @@ st.plotly_chart(fig, use_container_width=True)
 
 # PNG Export
 from plotly.graph_objs import Figure
+import socket
+from io import BytesIO
 
-# Make a copy of the figure without the current trace
-custom_title = st.text_input("📛 Title for Exported Plot (Note: Press enter to save title!)", "")
+# Detect whether the app is running on Streamlit Community Cloud
+is_cloud = "streamlit" in socket.gethostname().lower() or "adminuser" in socket.gethostname().lower()
+
+custom_title = st.text_input("📛 Title for Exported Plot", "Saved Traces Only")
+
+# Create export figure (traces only)
+from plotly.graph_objs import Figure
 
 export_fig = Figure()
 export_fig.update_layout(
-    title=dict(text=custom_title),#, font=dict(size=1)),
+    title=custom_title,
     xaxis_title="Time (s)",
     yaxis_title="Displacement x(t)",
     template="plotly_white",
+    width=1600,
+    height=800,
     legend=dict(
-         orientation="v",
+        orientation="v",
         x=1.02,
         xanchor="left",
         y=1,
         yanchor="top",
-        traceorder="normal",
+        traceorder='normal',
         font=dict(size=12),
         itemsizing='constant'
-        ),
-    height=600,
+    )
 )
 
 for t_i, x_i, _, label in st.session_state.traces:
-    export_fig.add_trace(go.Scatter(x=t_i, y=x_i, mode="lines", name=label, line=dict(width =2, dash="dash")))
+    export_fig.add_trace(go.Scatter(x=t_i, y=x_i, mode="lines", name=label, line=dict(dash="dash")))
 
-# Export to PNG
-buf = BytesIO()
-export_fig.write_image(buf, format="png", width=1600, height=800, scale=3)
-st.download_button("📥 Download Traces Only (PNG)", data=buf.getvalue(), file_name="oscillator_traces_only.png", mime="image/png")
+# HTML export (works everywhere)
+export_html = export_fig.to_html(full_html=False, include_plotlyjs="cdn")
+st.download_button(
+    "📄 Download Traces as Interactive HTML",
+    data=export_html,
+    file_name="oscillator_plot.html",
+    mime="text/html"
+)
+
+# PNG export only locally
+if not is_cloud:
+    buf = BytesIO()
+    export_fig.write_image(buf, format="png", width=1600, height=800)
+    st.download_button(
+        "📥 Download Traces as PNG (High Res)",
+        data=buf.getvalue(),
+        file_name="oscillator_plot.png",
+        mime="image/png"
+    )
+else:
+    st.info("🖼️ PNG export is only available when running locally. \
+To use this feature, click the GitHub icon (top-right) to access the repository and run the app on your machine.")
 
 
 
