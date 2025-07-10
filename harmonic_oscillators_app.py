@@ -158,7 +158,7 @@ is_cloud = "localhost" in socket.gethostname().lower() or "adminuser" in socket.
 
 #st.write(socket.gethostname().lower())
 
-custom_title = st.text_input("📛 Title for Exported Plot", "")
+custom_title = st.text_input("📛 Title for Exported Plot \n Notes: 1. Only *Added* traces are exported. You must hit Enter to save your title", "")
 
 # Create export figure (traces only)
 from plotly.graph_objs import Figure
