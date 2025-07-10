@@ -152,7 +152,11 @@ import socket
 from io import BytesIO
 
 # Detect whether the app is running on Streamlit Community Cloud
+
+
 is_cloud = "streamlit" in socket.gethostname().lower() or "adminuser" in socket.gethostname().lower()
+
+st.write(socket.gethostname().lower())
 
 custom_title = st.text_input("📛 Title for Exported Plot", "Saved Traces Only")
 
